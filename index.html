@@ -977,6 +977,10 @@
         <button class="tool-nav-btn" onclick="showTool('hash', this)"><i class="fas fa-hashtag"></i> Hash Generator</button>
         <button class="tool-nav-btn" onclick="showTool('cvss', this)"><i class="fas fa-tachometer-alt"></i> CVSS Calculator</button>
         <button class="tool-nav-btn" onclick="showTool('password', this)"><i class="fas fa-lock"></i> Password Entropy</button>
+        <button class="tool-nav-btn" onclick="showTool('subnet', this)"><i class="fas fa-network-wired"></i> Subnet Calculator</button>
+        <button class="tool-nav-btn" onclick="showTool('encoder', this)"><i class="fas fa-code"></i> Encoder / Decoder</button>
+        <button class="tool-nav-btn" onclick="showTool('jwt', this)"><i class="fas fa-key"></i> JWT Decoder</button>
+        <button class="tool-nav-btn" onclick="showTool('regex', this)"><i class="fas fa-filter"></i> Regex Tester</button>
       </div>
 
       <!-- IOC ANALYZER -->
@@ -1127,6 +1131,85 @@
             <div class="pw-stat-card"><div class="pw-stat-value" id="pw-crack">∞</div><div class="pw-stat-label">Est. Crack Time</div></div>
           </div>
           <div class="pw-issues" id="pw-checks"></div>
+        </div>
+      </div>
+
+      <!-- SUBNET CALCULATOR -->
+      <div id="tool-subnet" class="tool-panel">
+        <div class="tool-card">
+          <div class="tool-title"><i class="fas fa-network-wired"></i> Subnet / CIDR Calculator</div>
+          <div class="tool-desc">Enter an IP address with CIDR notation to calculate network range, broadcast address, usable hosts, and more.</div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            <input class="hash-input" id="subnet-input" type="text" placeholder="e.g. 192.168.1.0/24" style="max-width:280px;" oninput="calcSubnet()" />
+            <button class="btn-tool" onclick="calcSubnet()"><i class="fas fa-calculator"></i> Calculate</button>
+          </div>
+          <div id="subnet-results" style="margin-top:1.25rem;"></div>
+        </div>
+      </div>
+
+      <!-- ENCODER / DECODER -->
+      <div id="tool-encoder" class="tool-panel">
+        <div class="tool-card">
+          <div class="tool-title"><i class="fas fa-code"></i> Encoder / Decoder</div>
+          <div class="tool-desc">Encode or decode strings using Base64, Hex, URL encoding, and ROT13. Essential for malware analysis and incident investigation.</div>
+          <textarea class="ioc-input-area" id="enc-input" placeholder="Enter text to encode or decode..." style="min-height:80px;"></textarea>
+          <div class="tool-actions" style="flex-wrap:wrap;">
+            <button class="btn-tool" onclick="encDec('b64enc')"><i class="fas fa-arrow-right"></i> Base64 Encode</button>
+            <button class="btn-tool" onclick="encDec('b64dec')"><i class="fas fa-arrow-left"></i> Base64 Decode</button>
+            <button class="btn-tool" onclick="encDec('hexenc')"><i class="fas fa-arrow-right"></i> Hex Encode</button>
+            <button class="btn-tool" onclick="encDec('hexdec')"><i class="fas fa-arrow-left"></i> Hex Decode</button>
+            <button class="btn-tool" onclick="encDec('urlenc')"><i class="fas fa-arrow-right"></i> URL Encode</button>
+            <button class="btn-tool" onclick="encDec('urldec')"><i class="fas fa-arrow-left"></i> URL Decode</button>
+            <button class="btn-tool" onclick="encDec('rot13')"><i class="fas fa-sync"></i> ROT13</button>
+            <button class="btn-tool danger" onclick="document.getElementById('enc-input').value='';document.getElementById('enc-output').innerHTML=''"><i class="fas fa-trash"></i> Clear</button>
+          </div>
+          <div id="enc-output" style="margin-top:1.25rem;"></div>
+        </div>
+      </div>
+
+      <!-- JWT DECODER -->
+      <div id="tool-jwt" class="tool-panel">
+        <div class="tool-card">
+          <div class="tool-title"><i class="fas fa-key"></i> JWT Decoder</div>
+          <div class="tool-desc">Decode and inspect JSON Web Tokens. Reveals header, payload, and expiry — useful for cloud security and IAM investigations. Decoding only — no signature verification.</div>
+          <textarea class="ioc-input-area" id="jwt-input" placeholder="Paste a JWT token here...&#10;&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U" style="min-height:100px;" oninput="decodeJWT()"></textarea>
+          <div id="jwt-results" style="margin-top:1.25rem;"></div>
+        </div>
+      </div>
+
+      <!-- REGEX TESTER -->
+      <div id="tool-regex" class="tool-panel">
+        <div class="tool-card">
+          <div class="tool-title"><i class="fas fa-filter"></i> Regex Tester for IOC Patterns</div>
+          <div class="tool-desc">Test SIEM detection rules and IOC regex patterns against sample log data. Highlights all matches in real time.</div>
+          <div style="margin-bottom:0.75rem;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.35rem;font-family:'JetBrains Mono',monospace;">Regex Pattern</div>
+            <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+              <input class="hash-input" id="regex-pattern" type="text" placeholder="e.g. \b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b" style="flex:1;" oninput="testRegex()" />
+              <select id="regex-flags" onchange="testRegex()" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                <option value="g">g (global)</option>
+                <option value="gi">gi (global + case insensitive)</option>
+                <option value="gm">gm (global + multiline)</option>
+                <option value="gim">gim (all)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:0.75rem;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.35rem;font-family:'JetBrains Mono',monospace;">Quick Patterns</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <button class="pub-filter-btn" onclick="setPattern('\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b')">IPv4</button>
+              <button class="pub-filter-btn" onclick="setPattern('(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}')">Domain</button>
+              <button class="pub-filter-btn" onclick="setPattern('https?:\\/\\/[^\\s]+')">URL</button>
+              <button class="pub-filter-btn" onclick="setPattern('\\b[a-fA-F0-9]{32}\\b')">MD5</button>
+              <button class="pub-filter-btn" onclick="setPattern('\\b[a-fA-F0-9]{64}\\b')">SHA-256</button>
+              <button class="pub-filter-btn" onclick="setPattern('CVE-\\d{4}-\\d{4,}')">CVE</button>
+              <button class="pub-filter-btn" onclick="setPattern('[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}')">Email</button>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.35rem;font-family:'JetBrains Mono',monospace;">Test Data / Log Sample</div>
+          <textarea class="ioc-input-area" id="regex-test" placeholder="Paste log data or sample text here..." style="min-height:120px;" oninput="testRegex()"></textarea>
+          <div id="regex-results" style="margin-top:1rem;"></div>
+          <div id="regex-highlighted" style="margin-top:0.75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.7;white-space:pre-wrap;word-break:break-all;display:none;"></div>
         </div>
       </div>
 
@@ -1643,6 +1726,148 @@ function toggleMenu(){
 
 // Init CVSS on load
 window.addEventListener('load', ()=>{ calcCVSS(); renderPubs('all'); });
+
+// ── SUBNET CALCULATOR ──
+function calcSubnet(){
+  const val = document.getElementById('subnet-input').value.trim();
+  const el = document.getElementById('subnet-results');
+  if(!val){ el.innerHTML=''; return; }
+  const match = val.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d{1,2})$/);
+  if(!match){ el.innerHTML=`<div style="color:var(--danger);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">✗ Invalid format. Use CIDR notation: 192.168.1.0/24</div>`; return; }
+  const [,a,b,c,d,bits] = match.map(Number);
+  if([a,b,c,d].some(o=>o>255)||bits>32){ el.innerHTML=`<div style="color:var(--danger);font-size:0.85rem;">✗ Invalid IP or prefix length</div>`; return; }
+  const ip = (a<<24)+(b<<16)+(c<<8)+d;
+  const mask = bits===0 ? 0 : (~0 << (32-bits)) >>> 0;
+  const network = (ip & mask) >>> 0;
+  const broadcast = (network | (~mask >>> 0)) >>> 0;
+  const first = bits >= 31 ? network : network + 1;
+  const last = bits >= 31 ? broadcast : broadcast - 1;
+  const hosts = bits >= 31 ? (bits===32?1:2) : Math.pow(2, 32-bits) - 2;
+  const toIP = n => [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+  const toMask = m => [(m>>>24)&255,(m>>>16)&255,(m>>>8)&255,m&255].join('.');
+  const fields = [
+    ['Network Address', toIP(network)],
+    ['Subnet Mask', toMask(mask)],
+    ['Wildcard Mask', toMask(~mask>>>0)],
+    ['Broadcast Address', toIP(broadcast)],
+    ['First Usable Host', toIP(first)],
+    ['Last Usable Host', toIP(last)],
+    ['Usable Hosts', hosts.toLocaleString()],
+    ['Total Addresses', Math.pow(2,32-bits).toLocaleString()],
+    ['CIDR Notation', `${toIP(network)}/${bits}`],
+    ['IP Class', bits<=8?'A':bits<=16?'B':bits<=24?'C':'Classless'],
+  ];
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0.75rem;">${
+    fields.map(([label,val])=>`
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;">
+        <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.2rem;">${label}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;color:var(--accent-cyan);display:flex;justify-content:space-between;align-items:center;">
+          <span>${val}</span>
+          <button class="copy-btn" onclick="copyText('${val}')"><i class="fas fa-copy"></i></button>
+        </div>
+      </div>`).join('')
+  }</div>`;
+}
+
+// ── ENCODER / DECODER ──
+function encDec(mode){
+  const input = document.getElementById('enc-input').value;
+  const el = document.getElementById('enc-output');
+  if(!input){ showToast('Enter text first'); return; }
+  let result = '', label = '', error = '';
+  try {
+    if(mode==='b64enc'){ result = btoa(unescape(encodeURIComponent(input))); label='Base64 Encoded'; }
+    else if(mode==='b64dec'){ result = decodeURIComponent(escape(atob(input))); label='Base64 Decoded'; }
+    else if(mode==='hexenc'){ result = Array.from(new TextEncoder().encode(input)).map(b=>b.toString(16).padStart(2,'0')).join(' '); label='Hex Encoded'; }
+    else if(mode==='hexdec'){ result = new TextDecoder().decode(new Uint8Array(input.replace(/\s/g,'').match(/.{2}/g).map(h=>parseInt(h,16)))); label='Hex Decoded'; }
+    else if(mode==='urlenc'){ result = encodeURIComponent(input); label='URL Encoded'; }
+    else if(mode==='urldec'){ result = decodeURIComponent(input); label='URL Decoded'; }
+    else if(mode==='rot13'){ result = input.replace(/[a-zA-Z]/g,c=>String.fromCharCode((c<='Z'?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26)); label='ROT13'; }
+  } catch(e){ error = e.message; }
+  if(error){
+    el.innerHTML=`<div style="color:var(--danger);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">✗ Error: ${escHtml(error)}</div>`;
+    return;
+  }
+  window._lastEncResult = result;
+  el.innerHTML=`<div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1rem;">
+    <div style="font-size:0.7rem;color:var(--accent-cyan);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;">${label}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:var(--text-primary);word-break:break-all;display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;">
+      <span>${escHtml(result)}</span>
+      <button class="copy-btn" onclick="copyText(window._lastEncResult)"><i class="fas fa-copy"></i> Copy</button>
+    </div>
+  </div>`;
+}
+
+// ── JWT DECODER ──
+function decodeJWT(){
+  const token = document.getElementById('jwt-input').value.trim();
+  const el = document.getElementById('jwt-results');
+  if(!token){ el.innerHTML=''; return; }
+  const parts = token.split('.');
+  if(parts.length !== 3){ el.innerHTML=`<div style="color:var(--danger);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">✗ Invalid JWT — must have 3 parts separated by dots</div>`; return; }
+  try {
+    const decode = str => JSON.parse(decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/').padEnd(str.length+((4-str.length%4)%4),'=')))));
+    const header = decode(parts[0]);
+    const payload = decode(parts[1]);
+    const now = Math.floor(Date.now()/1000);
+    const exp = payload.exp;
+    const iat = payload.iat;
+    const expStatus = exp ? (exp < now ? `<span style="color:var(--danger)">✗ EXPIRED (${new Date(exp*1000).toUTCString()})</span>` : `<span style="color:var(--success)">✓ Valid until ${new Date(exp*1000).toUTCString()}</span>`) : '<span style="color:var(--text-muted)">No expiry set</span>';
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1rem;">
+          <div style="font-size:0.7rem;color:var(--accent-cyan);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;">Header</div>
+          <pre style="font-size:0.8rem;color:var(--text-primary);white-space:pre-wrap;word-break:break-all;">${escHtml(JSON.stringify(header,null,2))}</pre>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1rem;">
+          <div style="font-size:0.7rem;color:var(--accent-cyan);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;">Payload</div>
+          <pre style="font-size:0.8rem;color:var(--text-primary);white-space:pre-wrap;word-break:break-all;">${escHtml(JSON.stringify(payload,null,2))}</pre>
+        </div>
+      </div>
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1rem;display:flex;flex-wrap:wrap;gap:1.5rem;">
+        <div><div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Algorithm</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;color:var(--text-primary);margin-top:0.2rem;">${header.alg||'N/A'}</div></div>
+        <div><div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Issued At</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;color:var(--text-primary);margin-top:0.2rem;">${iat?new Date(iat*1000).toUTCString():'N/A'}</div></div>
+        <div><div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Expiry</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;margin-top:0.2rem;">${expStatus}</div></div>
+        <div><div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Subject</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;color:var(--text-primary);margin-top:0.2rem;">${escHtml(payload.sub||payload.email||'N/A')}</div></div>
+      </div>
+      <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;"><i class="fas fa-info-circle"></i> Signature is displayed only — not cryptographically verified in this tool.</div>`;
+  } catch(e){
+    el.innerHTML=`<div style="color:var(--danger);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">✗ Failed to decode: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// ── REGEX TESTER ──
+function setPattern(p){
+  document.getElementById('regex-pattern').value = p;
+  testRegex();
+}
+
+function testRegex(){
+  const pattern = document.getElementById('regex-pattern').value;
+  const flags = document.getElementById('regex-flags').value;
+  const text = document.getElementById('regex-test').value;
+  const resEl = document.getElementById('regex-results');
+  const hlEl = document.getElementById('regex-highlighted');
+  if(!pattern){ resEl.innerHTML=''; hlEl.style.display='none'; return; }
+  try {
+    const rx = new RegExp(pattern, flags);
+    const matches = [...text.matchAll(new RegExp(pattern, flags.includes('g')?flags:flags+'g'))];
+    if(!text){ resEl.innerHTML=`<div style="color:var(--text-secondary);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">Pattern valid ✓ — enter test data above</div>`; hlEl.style.display='none'; return; }
+    if(matches.length===0){
+      resEl.innerHTML=`<div style="color:var(--warning);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">No matches found</div>`;
+      hlEl.style.display='none';
+    } else {
+      resEl.innerHTML=`<div style="color:var(--success);font-size:0.85rem;font-family:'JetBrains Mono',monospace;margin-bottom:0.75rem;">✓ ${matches.length} match${matches.length>1?'es':''} found</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${matches.slice(0,50).map(m=>`<span style="background:rgba(100,255,218,0.12);border:1px solid rgba(100,255,218,0.3);color:var(--accent-cyan);padding:3px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">${escHtml(m[0])}</span>`).join('')}${matches.length>50?`<span style="color:var(--text-muted);font-size:0.8rem;">...and ${matches.length-50} more</span>`:''}</div>`;
+      const highlighted = text.replace(new RegExp(pattern, flags.includes('g')?flags:flags+'g'), m=>`\x00${m}\x01`);
+      hlEl.innerHTML = escHtml(highlighted).replace(/\x00(.*?)\x01/g,'<mark style="background:rgba(100,255,218,0.25);color:var(--accent-cyan);border-radius:2px;padding:0 2px;">$1</mark>');
+      hlEl.style.display='block';
+    }
+  } catch(e){
+    resEl.innerHTML=`<div style="color:var(--danger);font-size:0.85rem;font-family:'JetBrains Mono',monospace;">✗ Invalid regex: ${escHtml(e.message)}</div>`;
+    hlEl.style.display='none';
+  }
+}
 
 // ── PUBLICATIONS ──
 const publications = [
