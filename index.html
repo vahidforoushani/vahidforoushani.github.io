@@ -89,7 +89,20 @@
       display: flex; align-items: center;
       padding-top: 64px;
     }
-    .hero-inner { max-width: 800px; }
+    .hero-layout { display: flex; align-items: center; justify-content: space-between; gap: 4rem; width: 100%; }
+    .hero-inner { max-width: 680px; flex: 1; }
+    .hero-photo-wrap { flex-shrink: 0; }
+    .hero-photo {
+      width: 280px; height: 280px; border-radius: 50%;
+      object-fit: cover; object-position: top center;
+      border: 3px solid var(--accent-cyan);
+      box-shadow: 0 0 40px rgba(100,255,218,0.2), 0 0 80px rgba(100,255,218,0.08);
+      display: block;
+    }
+    @media (max-width: 900px) {
+      .hero-layout { flex-direction: column-reverse; gap: 2rem; }
+      .hero-photo { width: 180px; height: 180px; }
+    }
     .hero-tag {
       font-family: 'JetBrains Mono', monospace;
       color: var(--accent-cyan); font-size: 0.95rem;
@@ -524,6 +537,15 @@
     .pw-issue.fail { color: var(--text-secondary); }
 
     /* ── PUBLICATIONS ── */
+    .lookup-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace; text-decoration: none;
+      background: rgba(100,255,218,0.07); border: 1px solid rgba(100,255,218,0.25);
+      color: var(--accent-cyan); transition: background 0.2s;
+    }
+    .lookup-link:hover { background: rgba(100,255,218,0.18); }
+
     .pub-filter-btn {
       padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
       background: transparent; color: var(--text-secondary);
@@ -656,6 +678,7 @@
 <!-- HERO -->
 <section id="hero">
   <div class="container">
+    <div class="hero-layout">
     <div class="hero-inner">
       <p class="hero-tag">Hello, I'm</p>
       <h1 class="hero-name">Vahid Foroushani</h1>
@@ -682,6 +705,10 @@
         <a href="#contact" class="btn-primary"><i class="fas fa-envelope"></i> Get In Touch</a>
         <a href="#tools" class="btn-outline"><i class="fas fa-tools"></i> Security Tools</a>
       </div>
+    </div>
+    <div class="hero-photo-wrap">
+      <img src="photo.jpg" alt="Vahid Foroushani" class="hero-photo" />
+    </div>
     </div>
   </div>
 </section>
@@ -955,11 +982,12 @@
       <div id="tool-ioc" class="tool-panel active">
         <div class="tool-card">
           <div class="tool-title"><i class="fas fa-crosshairs"></i> IOC Analyzer & Defanger</div>
-          <div class="tool-desc">Paste any indicators of compromise — IPs, domains, URLs, file hashes, emails, or CVE IDs. The analyzer identifies the IOC type, assesses risk via URLhaus & NIST NVD, and defangs for safe sharing.</div>
+          <div class="tool-desc">Paste any indicators of compromise — IPs, domains, URLs, file hashes, emails, or CVE IDs. The analyzer identifies the IOC type, scores CVEs via NIST NVD, defangs for safe sharing, and provides one-click links to major threat intel platforms.</div>
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
-            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> URLhaus (malware/phishing)</span>
-            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> NIST NVD (CVE lookup)</span>
-            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> IOC defang / refang</span>
+            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> IOC type detection</span>
+            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> NIST NVD CVE scoring</span>
+            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> Defang / Refang</span>
+            <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--success);font-family:'JetBrains Mono',monospace;"><i class="fas fa-check-circle"></i> 1-click VirusTotal, URLhaus, AbuseIPDB</span>
           </div>
           <textarea class="ioc-input-area" id="ioc-input" placeholder="Paste IOCs here — one per line or mixed:&#10;&#10;8.8.8.8&#10;malware-domain[.]com&#10;3395856ce81f2b7382dee72602f798b642f14d8&#10;https://phishing-site.net/login&#10;CVE-2021-44228&#10;attacker@evil.com"></textarea>
           <div class="tool-actions">
@@ -1252,16 +1280,6 @@ function typeClass(type){
   return 'type-'+(map[type]||'unknown');
 }
 
-async function queryURLhaus(ioc, type){
-  if(!['Domain','URL','IPv4'].includes(type)) return null;
-  try{
-    const body = type==='URL' ? `url=${encodeURIComponent(ioc)}` : `host=${encodeURIComponent(ioc)}`;
-    const endpoint = type==='URL' ? 'https://urlhaus-api.abuse.ch/v1/url/' : 'https://urlhaus-api.abuse.ch/v1/host/';
-    const r = await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-    const d = await r.json();
-    return d;
-  }catch(e){ return {query_status:'error', error: e.message}; }
-}
 
 async function queryCVE(cveId){
   try{
@@ -1299,12 +1317,6 @@ async function analyzeIOCs(){
     html += `<div class="result-grid">`;
     html += `<div class="result-field"><div class="result-field-label">Type</div><div class="result-field-value">${type}</div></div>`;
 
-    // URLhaus lookup
-    let urlhausData = null;
-    if(['Domain','URL','IPv4'].includes(type)){
-      urlhausData = await queryURLhaus(line, type);
-    }
-
     // CVE lookup
     let cveData = null;
     if(type === 'CVE'){
@@ -1313,11 +1325,7 @@ async function analyzeIOCs(){
 
     // Risk assessment
     let risk = 'Unknown', riskClass = 'risk-unknown';
-    if(urlhausData){
-      if(urlhausData.query_status==='is_host'||urlhausData.query_status==='is_url') { risk='High'; riskClass='risk-high'; }
-      else if(urlhausData.query_status==='no_results') { risk='Low'; riskClass='risk-low'; }
-      // error case: leave as Unknown
-    } else if(cveData){
+    if(cveData){
       const s = parseFloat(cveData.cvss);
       if(s>=9) { risk='Critical'; riskClass='risk-high'; }
       else if(s>=7) { risk='High'; riskClass='risk-high'; }
@@ -1327,15 +1335,34 @@ async function analyzeIOCs(){
 
     html += `<div class="result-field"><div class="result-field-label">Risk Level</div><div class="result-field-value"><span class="risk-badge ${riskClass}">${risk}</span></div></div>`;
 
-    if(urlhausData && urlhausData.query_status){
-      let uhDisplay;
-      if(urlhausData.query_status==='no_results') uhDisplay=`<span style="color:var(--success)">Not listed</span>`;
-      else if(urlhausData.query_status==='error') uhDisplay=`<span style="color:var(--text-muted)">Lookup failed (CORS — host from a web server to work)</span>`;
-      else uhDisplay=`<span style="color:var(--danger)">⚠ Listed as malicious</span>`;
-      html += `<div class="result-field" style="grid-column:span 2"><div class="result-field-label">URLhaus</div><div class="result-field-value">${uhDisplay}</div></div>`;
-    }
     if(cveData){
       html += `<div class="result-field"><div class="result-field-label">CVSS Score</div><div class="result-field-value">${cveData.cvss} (${cveData.sev})</div></div>`;
+    }
+
+    // External lookup links
+    const encoded = encodeURIComponent(line);
+    const cleanIoc = line.replace(/\[\.\]/g,'.').replace(/\[@\]/g,'@').replace(/hxxp/gi,'http');
+    const cleanEncoded = encodeURIComponent(cleanIoc);
+    let lookupLinks = [];
+    if(['IPv4','IPv6'].includes(type)){
+      lookupLinks.push(`<a href="https://urlhaus.abuse.ch/browse.php?search=${cleanEncoded}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> URLhaus</a>`);
+      lookupLinks.push(`<a href="https://www.abuseipdb.com/check/${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> AbuseIPDB</a>`);
+      lookupLinks.push(`<a href="https://www.virustotal.com/gui/ip-address/${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> VirusTotal</a>`);
+    } else if(type==='Domain'){
+      lookupLinks.push(`<a href="https://urlhaus.abuse.ch/browse.php?search=${cleanEncoded}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> URLhaus</a>`);
+      lookupLinks.push(`<a href="https://www.virustotal.com/gui/domain/${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> VirusTotal</a>`);
+    } else if(type==='URL'){
+      lookupLinks.push(`<a href="https://urlhaus.abuse.ch/browse.php?search=${cleanEncoded}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> URLhaus</a>`);
+      lookupLinks.push(`<a href="https://www.virustotal.com/gui/url/${btoa(cleanIoc).replace(/=/g,'')}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> VirusTotal</a>`);
+    } else if(['MD5','SHA-1','SHA-256','SHA-512'].includes(type)){
+      lookupLinks.push(`<a href="https://www.virustotal.com/gui/file/${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> VirusTotal</a>`);
+      lookupLinks.push(`<a href="https://bazaar.abuse.ch/browse.php?search=${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> MalwareBazaar</a>`);
+    } else if(type==='CVE'){
+      lookupLinks.push(`<a href="https://nvd.nist.gov/vuln/detail/${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> NIST NVD</a>`);
+      lookupLinks.push(`<a href="https://www.cvedetails.com/cve/${cleanIoc}" target="_blank" class="lookup-link"><i class="fas fa-external-link-alt"></i> CVEdetails</a>`);
+    }
+    if(lookupLinks.length){
+      html += `<div class="result-field" style="grid-column:span 2"><div class="result-field-label">Investigate Further</div><div class="result-field-value" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.2rem;">${lookupLinks.join('')}</div></div>`;
     }
 
     html += `</div>`;
